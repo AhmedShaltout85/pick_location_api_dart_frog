@@ -6,7 +6,7 @@ A complete REST API built with Dart Frog and MS SQL Server, featuring JWT authen
 
 - JWT Authentication
 - Password Encryption (SHA-256)
-- MS SQL Server Database
+- MS SQL Server Database (using mssql_dart - pure Dart implementation)
 - RESTful API Design
 - Protected Routes
 - Model-based Architecture
@@ -19,15 +19,27 @@ A complete REST API built with Dart Frog and MS SQL Server, featuring JWT authen
 
 ## Installation
 
+### Step 1: Install ODBC Driver
+
+This project uses `dart_odbc` to connect to SQL Server, which requires the ODBC driver to be installed on your system.
+
+**⚠️ IMPORTANT**: Before proceeding, follow the detailed setup instructions in [SETUP_GUIDE.md](SETUP_GUIDE.md) to install:
+- unixODBC (Linux/macOS)
+- Microsoft ODBC Driver 17 for SQL Server
+
+### Step 2: Install Dart Dependencies
+
 1. Install dart_frog CLI:
 ```bash
 dart pub global activate dart_frog_cli
 ```
 
-2. Install dependencies:
+2. Install project dependencies:
 ```bash
 dart pub get
 ```
+
+### Step 3: Configure Database Connection
 
 3. Create `.env` file from `.env.example`:
 ```bash
@@ -36,14 +48,12 @@ cp .env.example .env
 
 4. Configure your database credentials in `.env`:
 ```
-DB_HOST=localhost
-DB_PORT=1433
-DB_NAME=your_database_name
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+DB_DSN=Driver={ODBC Driver 17 for SQL Server};Server=localhost;Database=your_database_name;UID=your_username;PWD=your_password;
 JWT_SECRET=your_super_secret_jwt_key
 JWT_EXPIRY_HOURS=24
 ```
+
+**Note**: See [SETUP_GUIDE.md](SETUP_GUIDE.md) for detailed connection string options and troubleshooting.
 
 ## Project Structure
 
