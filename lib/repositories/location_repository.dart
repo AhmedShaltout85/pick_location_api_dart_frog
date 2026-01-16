@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs
-
 import 'package:pick_location_api/config/database.dart';
 import 'package:pick_location_api/models/location.dart';
 
@@ -7,14 +5,14 @@ class LocationRepository {
   Future<List<Location>> findAll() async {
     final conn = DatabaseConfig.getConnection();
 
-    final result = await conn.execute('SELECT * FROM Locations');
-    return result.map((row) => Location.fromJson(row)).toList();
+    final result = conn.execute('SELECT * FROM Locations');
+    return result.map(Location.fromJson).toList();
   }
 
   Future<Location?> findById(int id) async {
     final conn = DatabaseConfig.getConnection();
 
-    final result = await conn.execute(
+    final result = conn.execute(
       'SELECT * FROM Locations WHERE ID = ?',
       params: [id],
     );
@@ -26,28 +24,28 @@ class LocationRepository {
   Future<List<Location>> findByHandasah(String handasahName) async {
     final conn = DatabaseConfig.getConnection();
 
-    final result = await conn.execute(
+    final result = conn.execute(
       'SELECT * FROM Locations WHERE Handasah_Name = ?',
       params: [handasahName],
     );
 
-    return result.map((row) => Location.fromJson(row)).toList();
+    return result.map(Location.fromJson).toList();
   }
 
   Future<List<Location>> findPending() async {
     final conn = DatabaseConfig.getConnection();
 
-    final result = await conn.execute(
+    final result = conn.execute(
       'SELECT * FROM Locations WHERE Is_Finished = 0',
     );
 
-    return result.map((row) => Location.fromJson(row)).toList();
+    return result.map(Location.fromJson).toList();
   }
 
   Future<Location> create(Location location) async {
     final conn = DatabaseConfig.getConnection();
 
-    await conn.execute(
+    conn.execute(
       '''
       INSERT INTO Locations 
       (Address, Latitude, Longtiude, Date, Flag, Gis_Url, Handasah_Name, 
@@ -73,9 +71,24 @@ class LocationRepository {
       ],
     );
 
-    // Get the last inserted ID
-    final idResult = await conn.execute('SELECT @@IDENTITY AS ID');
-    final insertedId = idResult.first['ID'] as int;
+    // Get the last inserted ID using SCOPE_IDENTITY()
+    final idResult = conn.execute('SELECT SCOPE_IDENTITY() AS ID');
+
+    if (idResult.isEmpty || idResult.first['ID'] == null) {
+      // If we can't get the ID, return location without it
+      return location;
+    }
+
+    final idValue = idResult.first['ID'];
+    int insertedId;
+
+    if (idValue is int) {
+      insertedId = idValue;
+    } else if (idValue is double) {
+      insertedId = idValue.toInt();
+    } else {
+      insertedId = int.parse(idValue.toString());
+    }
 
     return Location(
       id: insertedId,
@@ -99,7 +112,7 @@ class LocationRepository {
   Future<bool> update(int id, Location location) async {
     final conn = DatabaseConfig.getConnection();
 
-    await conn.execute(
+    conn.execute(
       '''
       UPDATE Locations 
       SET Address = ?, 
@@ -141,7 +154,7 @@ class LocationRepository {
   Future<bool> delete(int id) async {
     final conn = DatabaseConfig.getConnection();
 
-    await conn.execute(
+    conn.execute(
       'DELETE FROM Locations WHERE ID = ?',
       params: [id],
     );

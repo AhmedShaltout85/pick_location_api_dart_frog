@@ -1,9 +1,7 @@
-// ignore_for_file: directives_ordering
-
 import 'dart:io';
 import 'package:dart_frog/dart_frog.dart';
-import 'package:pick_location_api/repositories/user_repository.dart';
-import 'package:pick_location_api/config/jwt.dart';
+import '../../lib/repositories/user_repository.dart';
+import '../../lib/config/jwt.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   if (context.request.method != HttpMethod.post) {
@@ -50,7 +48,7 @@ Future<Response> onRequest(RequestContext context) async {
   } catch (e) {
     return Response.json(
       statusCode: HttpStatus.internalServerError,
-      body: {'error': 'Server error: $e'},
+      body: {'error': 'Server error: ${e.toString()}'},
     );
   }
 }
