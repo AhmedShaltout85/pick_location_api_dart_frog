@@ -10,6 +10,8 @@
 //     return hash.toString();
 //   }
 
+// ignore_for_file: public_member_api_docs
+
 //   static bool verifyPassword(String password, String hashedPassword) {
 //     return hashPassword(password) == hashedPassword;
 //   }

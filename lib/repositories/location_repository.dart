@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs, cascade_invocations
+
 import 'package:pick_location_api/config/database.dart';
 import 'package:pick_location_api/models/location.dart';
 

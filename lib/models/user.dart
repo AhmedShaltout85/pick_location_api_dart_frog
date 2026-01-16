@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 class User {
   User({
     this.id,
@@ -11,53 +9,49 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    // Get the password value from any key that contains 'password'
-    dynamic password;
+    // Access values by iterating and using contains instead of ==
+    dynamic id, userName, userPassword, role, controlUnit, technicalId;
 
-    // Try exact key first
-    if (json.containsKey('user_password')) {
-      password = json['user_password'];
-    } else {
-      // Find any key containing 'password'
-      final passwordKey = json.keys.firstWhere(
-        (key) => key.toLowerCase().contains('password'),
-        orElse: () => '',
-      );
-      if (passwordKey.isNotEmpty) {
-        password = json[passwordKey];
+    json.forEach((key, value) {
+      final keyStr = key.trim().toLowerCase();
+
+      if (keyStr.contains('id') && !keyStr.contains('_')) {
+        id = value;
+      } else if (keyStr.contains('user_name')) {
+        userName = value;
+      } else if (keyStr.contains('user_password')) {
+        userPassword = value;
+      } else if (keyStr.contains('role')) {
+        role = value;
+      } else if (keyStr.contains('control_unit')) {
+        controlUnit = value;
+      } else if (keyStr.contains('technical_id')) {
+        technicalId = value;
       }
-    }
+    });
 
-    // CRITICAL: Trim the password and handle NVARCHAR padding
+    // Handle password with NVARCHAR padding
     String? trimmedPassword;
-    if (password != null) {
-      final passwordStr = password is String ? password : password.toString();
-
-      // Check what's after position 64
-      if (passwordStr.length > 64) {
-        log('DEBUG: Character at position 64: ${passwordStr.codeUnitAt(64)}');
-        log('DEBUG: Character at position 65: ${passwordStr.codeUnitAt(65)}');
-        log('DEBUG: Substring 60-70: "${passwordStr.substring(60, 70)}"');
-      }
-
-      // SHA-256 hash is always 64 characters, so take only the first 64
+    if (userPassword != null) {
+      final passwordStr = _parseStringSafe(userPassword) ?? '';
+      // SHA-256 is always 64 chars, take first 64 to remove padding
       if (passwordStr.length >= 64) {
         trimmedPassword = passwordStr.substring(0, 64);
       } else {
-        trimmedPassword = passwordStr.trim();
+        trimmedPassword = passwordStr;
       }
-
-      log('DEBUG fromJson: Final password length: ${trimmedPassword.length}');
     }
 
-    return User(
-      id: _parseIntSafe(json['id']),
-      userName: json['user_name'] as String?,
+    final user = User(
+      id: _parseIntSafe(id),
+      userName: _parseStringSafe(userName),
       userPassword: trimmedPassword,
-      role: _parseIntSafe(json['role']),
-      controlUnit: json['control_unit'] as String?,
-      technicalId: _parseIntSafe(json['technical_id']),
+      role: _parseIntSafe(role),
+      controlUnit: _parseStringSafe(controlUnit),
+      technicalId: _parseIntSafe(technicalId),
     );
+
+    return user;
   }
   final int? id;
   final String? userName;
@@ -69,8 +63,19 @@ class User {
   static int? _parseIntSafe(dynamic value) {
     if (value == null) return null;
     if (value is int) return value;
-    if (value is String) return int.tryParse(value);
+    if (value is String) {
+      // Remove null padding before parsing
+      final cleaned = value.replaceAll(RegExp(r'\x00'), '').trim();
+      return int.tryParse(cleaned);
+    }
     return int.tryParse(value.toString());
+  }
+
+  static String? _parseStringSafe(dynamic value) {
+    if (value == null) return null;
+    final strValue = value is String ? value : value.toString();
+    // Remove null padding characters
+    return strValue.replaceAll(RegExp(r'\x00'), '').trim();
   }
 
   Map<String, dynamic> toJson({bool includePassword = false}) {
