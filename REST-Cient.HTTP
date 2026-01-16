@@ -1,0 +1,23 @@
+
+###CREATE-USER
+curl -X POST http://localhost:8080/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "admin123",
+    "role": 1,
+    "control_unit": "Main Unit",
+    "technical_id": 1
+  }'
+
+###LOGIN
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "admin",
+    "password": "admin123"
+  }'
+
+###GET-USERS
+GET http://localhost:8080/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6MSwiZXhwIjoxNzY4NjU0ODU1LCJpYXQiOjE3Njg1Njg0NTV9.NPNsmMgksRBg8jVCheWrt4mvJbAH4xkoQnVjruhz3_g 

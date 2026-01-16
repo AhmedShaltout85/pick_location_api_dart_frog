@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:crypto/crypto.dart';
 
 void main() {
-  final password = 'admin123';
+  const password = 'admin123';
   final bytes = utf8.encode(password);
   final hash = sha256.convert(bytes);
-  print('Password: $password');
-  print('Hash: $hash');
-  print('Hash length: ${hash.toString().length}');
+  log('Password: $password');
+  log('Hash: $hash');
+  log('Hash length: ${hash.toString().length}');
 }
