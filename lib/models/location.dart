@@ -16,6 +16,7 @@ class Location {
   final String? brokenType;
   final String? callerNumber;
   final int? videoCall;
+
   Location({
     required this.address,
     required this.date,
@@ -34,38 +35,79 @@ class Location {
     this.videoCall,
   });
 
+  // factory Location.fromJson(Map<String, dynamic> json) {
+  //   return Location(
+  //     id: _parseIntSafe(json['ID']),
+  //     address:
+  //         json['Address']?.toString() ?? '', // Handle null and provide default
+  //     latitude: json['Latitude']?.toString(),
+  //     longitude: json['Longitude']?.toString(),
+  //     date: _parseDateSafe(json['Date']),
+  //     flag: _parseIntSafe(json['Flag']),
+  //     gisUrl: json['Gis_Url']?.toString(),
+  //     handasahName: json['Handasah_Name']?.toString(),
+  //     technicalName: json['Technical_Name']?.toString(),
+  //     isFinished: _parseIntSafe(json['Is_Finished']) ?? 0,
+  //     isApproved: _parseIntSafe(json['Is_Approved']) ?? 0,
+  //     callerName: json['Caller_Name']?.toString(),
+  //     brokenType: json['Broken_Type']?.toString(),
+  //     callerNumber: json['Caller_Number']?.toString(),
+  //     videoCall: _parseIntSafe(json['Video_Call']),
+  //   );
+  // }
   factory Location.fromJson(Map<String, dynamic> json) {
     return Location(
       id: _parseIntSafe(json['ID']),
-      address: json['Address'] as String,
-      latitude: json['Latitude'] as String?,
-      longitude: json['Longtiude'] as String?,
+      address: json['Address']?.toString() ?? '',
+      latitude: json['Latitude']
+          ?.toString(), // ✅ This is correct - converts to string
+      longitude: json['Longitude']
+          ?.toString(), // ✅ This is correct - converts to string
       date: _parseDateSafe(json['Date']),
       flag: _parseIntSafe(json['Flag']),
-      gisUrl: json['Gis_Url'] as String?,
-      handasahName: json['Handasah_Name'] as String?,
-      technicalName: json['Technical_Name'] as String?,
+      gisUrl: json['Gis_Url']?.toString(),
+      handasahName: json['Handasah_Name']?.toString(),
+      technicalName: json['Technical_Name']?.toString(),
       isFinished: _parseIntSafe(json['Is_Finished']) ?? 0,
       isApproved: _parseIntSafe(json['Is_Approved']) ?? 0,
-      callerName: json['Caller_Name'] as String?,
-      brokenType: json['Broken_Type'] as String?,
-      callerNumber: json['Caller_Number'] as String?,
+      callerName: json['Caller_Name']?.toString(),
+      brokenType: json['Broken_Type']?.toString(),
+      callerNumber: json['Caller_Number']?.toString(),
       videoCall: _parseIntSafe(json['Video_Call']),
     );
   }
+  // static int? _parseIntSafe(dynamic value) {
+  //   if (value == null) return null;
+  //   if (value is int) return value;
+  //   if (value is String) return int.tryParse(value);
+  //   return int.tryParse(value.toString());
+  // }
+
+  // static DateTime _parseDateSafe(dynamic value) {
+  //   if (value == null) return DateTime.now();
+  //   if (value is DateTime) return value;
+  //   if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+  //   return DateTime.now();
+  // }
+
+  static DateTime _parseDateSafe(dynamic value) {
+    print(
+      '_parseDateSafe input: $value (type: ${value.runtimeType})',
+    ); // ADD THIS
+    if (value == null) return DateTime.now();
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    return DateTime.now();
+  }
 
   static int? _parseIntSafe(dynamic value) {
+    print(
+      '_parseIntSafe input: $value (type: ${value.runtimeType})',
+    ); // ADD THIS
     if (value == null) return null;
     if (value is int) return value;
     if (value is String) return int.tryParse(value);
     return int.tryParse(value.toString());
-  }
-
-  static DateTime _parseDateSafe(dynamic value) {
-    if (value == null) return DateTime.now();
-    if (value is DateTime) return value;
-    if (value is String) return DateTime.parse(value);
-    return DateTime.now();
   }
 
   Map<String, dynamic> toJson() {
@@ -73,7 +115,7 @@ class Location {
       'ID': id,
       'Address': address,
       'Latitude': latitude,
-      'Longtiude': longitude,
+      'Longitude': longitude,
       'Date': date.toIso8601String(),
       'Flag': flag,
       'Gis_Url': gisUrl,
@@ -86,5 +128,41 @@ class Location {
       'Caller_Number': callerNumber,
       'Video_Call': videoCall,
     };
+  }
+
+  Location copyWith({
+    int? id,
+    String? address,
+    String? latitude,
+    String? longitude,
+    DateTime? date,
+    int? flag,
+    String? gisUrl,
+    String? handasahName,
+    String? technicalName,
+    int? isFinished,
+    int? isApproved,
+    String? callerName,
+    String? brokenType,
+    String? callerNumber,
+    int? videoCall,
+  }) {
+    return Location(
+      id: id ?? this.id,
+      address: address ?? this.address,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      date: date ?? this.date,
+      flag: flag ?? this.flag,
+      gisUrl: gisUrl ?? this.gisUrl,
+      handasahName: handasahName ?? this.handasahName,
+      technicalName: technicalName ?? this.technicalName,
+      isFinished: isFinished ?? this.isFinished,
+      isApproved: isApproved ?? this.isApproved,
+      callerName: callerName ?? this.callerName,
+      brokenType: brokenType ?? this.brokenType,
+      callerNumber: callerNumber ?? this.callerNumber,
+      videoCall: videoCall ?? this.videoCall,
+    );
   }
 }

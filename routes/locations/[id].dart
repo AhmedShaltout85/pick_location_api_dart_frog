@@ -5,7 +5,6 @@ import 'package:dart_frog/dart_frog.dart';
 import 'package:pick_location_api/models/location.dart';
 import 'package:pick_location_api/repositories/location_repository.dart';
 
-
 Future<Response> onRequest(RequestContext context, String id) async {
   final locationId = int.tryParse(id);
   if (locationId == null) {

@@ -1,14 +1,36 @@
-// ignore_for_file: public_member_api_docs, cascade_invocations
+// ignore_for_file: public_member_api_docs
 
+import 'package:dart_odbc/dart_odbc.dart';
 import 'package:pick_location_api/config/database.dart';
 import 'package:pick_location_api/models/location.dart';
 
 class LocationRepository {
+  /// Clean ODBC row data by removing NULL bytes from keys and string values
+  /// This fixes a bug in dart_odbc where fixed-width buffers aren't properly trimmed
+  Map<String, dynamic> _cleanOdbcRow(Map<String, dynamic> row) {
+    final cleanRow = <String, dynamic>{};
+
+    for (final entry in row.entries) {
+      final cleanKey = entry.key.replaceAll('\u0000', '');
+      final value = entry.value;
+      final cleanValue =
+          value is String ? value.replaceAll('\u0000', '') : value;
+
+      cleanRow[cleanKey] = cleanValue;
+    }
+
+    return cleanRow;
+  }
+
+  /// Clean and map multiple ODBC rows to Location objects
+  List<Location> _mapToLocations(List<Map<String, dynamic>> rows) {
+    return rows.map(_cleanOdbcRow).map(Location.fromJson).toList();
+  }
+
   Future<List<Location>> findAll() async {
     final conn = DatabaseConfig.getConnection();
-
     final result = conn.execute('SELECT * FROM Locations');
-    return result.map(Location.fromJson).toList();
+    return _mapToLocations(result);
   }
 
   Future<Location?> findById(int id) async {
@@ -20,7 +42,8 @@ class LocationRepository {
     );
 
     if (result.isEmpty) return null;
-    return Location.fromJson(result.first);
+
+    return Location.fromJson(_cleanOdbcRow(result.first));
   }
 
   Future<List<Location>> findByHandasah(String handasahName) async {
@@ -31,7 +54,7 @@ class LocationRepository {
       params: [handasahName],
     );
 
-    return result.map(Location.fromJson).toList();
+    return _mapToLocations(result);
   }
 
   Future<List<Location>> findPending() async {
@@ -41,16 +64,19 @@ class LocationRepository {
       'SELECT * FROM Locations WHERE Is_Finished = 0',
     );
 
-    return result.map(Location.fromJson).toList();
+    return _mapToLocations(result);
   }
 
   Future<Location> create(Location location) async {
     final conn = DatabaseConfig.getConnection();
 
+    // Convert DateTime to SQL Server compatible format (YYYY-MM-DD)
+    final dateStr = location.date.toIso8601String().split('T')[0];
+
     conn.execute(
       '''
       INSERT INTO Locations 
-      (Address, Latitude, Longtiude, Date, Flag, Gis_Url, Handasah_Name, 
+      (Address, Latitude, Longitude, Date, Flag, Gis_Url, Handasah_Name, 
        Technical_Name, Is_Finished, Is_Approved, Caller_Name, Broken_Type, 
        Caller_Number, Video_Call)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -59,7 +85,7 @@ class LocationRepository {
         location.address,
         location.latitude,
         location.longitude,
-        location.date,
+        dateStr,
         location.flag,
         location.gisUrl,
         location.handasahName,
@@ -73,42 +99,27 @@ class LocationRepository {
       ],
     );
 
-    // Get the last inserted ID using SCOPE_IDENTITY()
+    // Get the last inserted ID
+    final insertedId = await _getLastInsertedId(conn);
+
+    return location.copyWith(id: insertedId);
+  }
+
+  /// Retrieve the last inserted ID from SQL Server
+  Future<int?> _getLastInsertedId(DartOdbc conn) async {
     final idResult = conn.execute('SELECT SCOPE_IDENTITY() AS ID');
 
-    if (idResult.isEmpty || idResult.first['ID'] == null) {
-      // If we can't get the ID, return location without it
-      return location;
-    }
+    if (idResult.isEmpty) return null;
 
-    final idValue = idResult.first['ID'];
-    int insertedId;
+    final cleanRow = _cleanOdbcRow(idResult.first);
+    final idValue = cleanRow['ID'];
 
-    if (idValue is int) {
-      insertedId = idValue;
-    } else if (idValue is double) {
-      insertedId = idValue.toInt();
-    } else {
-      insertedId = int.parse(idValue.toString());
-    }
+    if (idValue == null) return null;
 
-    return Location(
-      id: insertedId,
-      address: location.address,
-      latitude: location.latitude,
-      longitude: location.longitude,
-      date: location.date,
-      flag: location.flag,
-      gisUrl: location.gisUrl,
-      handasahName: location.handasahName,
-      technicalName: location.technicalName,
-      isFinished: location.isFinished,
-      isApproved: location.isApproved,
-      callerName: location.callerName,
-      brokenType: location.brokenType,
-      callerNumber: location.callerNumber,
-      videoCall: location.videoCall,
-    );
+    if (idValue is int) return idValue;
+    if (idValue is double) return idValue.toInt();
+
+    return int.tryParse(idValue.toString());
   }
 
   Future<bool> update(int id, Location location) async {
@@ -119,7 +130,7 @@ class LocationRepository {
       UPDATE Locations 
       SET Address = ?, 
           Latitude = ?, 
-          Longtiude = ?,
+          Longitude = ?,
           Flag = ?,
           Gis_Url = ?,
           Handasah_Name = ?,

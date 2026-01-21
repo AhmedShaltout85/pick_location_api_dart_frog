@@ -1,6 +1,13 @@
+@BASE_IP= http://localhost:8080
+@AUTH_LOGIN = /auth/login 
+@AUTH_REGISTER = /auth/register
+@LOCTIONS_END_POINT = /locations
+@USER_END_POINT = /users
+@ACCESS_TOKEN= Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMDMsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoxLCJleHAiOjE3NjkwMjU4ODIsImlhdCI6MTc2ODkzOTQ4Mn0.N9fNxBno3GmcXDPL0ugZgxOd7BEZDXTtN4kGVaC5PzM
+
 
 ###CREATE-USER
-curl -X POST http://localhost:8080/auth/register \
+curl -X POST {{BASE_IP}}{{AUTH_REGISTER}} \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin",
@@ -11,7 +18,7 @@ curl -X POST http://localhost:8080/auth/register \
   }'
 
 ###LOGIN
-curl -X POST http://localhost:8080/auth/login \
+curl -X POST {{BASE_IP}}{{AUTH_LOGIN}} \
   -H "Content-Type: application/json" \
   -d '{
     "username": "admin",
@@ -19,5 +26,51 @@ curl -X POST http://localhost:8080/auth/login \
   }'
 
 ###GET-USERS
-GET http://localhost:8080/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEyLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6MSwiZXhwIjoxNzY4NjU0ODU1LCJpYXQiOjE3Njg1Njg0NTV9.NPNsmMgksRBg8jVCheWrt4mvJbAH4xkoQnVjruhz3_g 
+GET {{BASE_IP}}{{USER_END_POINT}}
+Authorization: {{ACCESS_TOKEN}}
+
+###GET-USER-BY-ID
+GET {{BASE_IP}}{{USER_END_POINT}}/1
+Authorization: {{ACCESS_TOKEN}}
+
+###GET-LOCATIONS
+
+curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}\
+  -H "Authorization: {{ACCESS_TOKEN}}"
+
+###GET-LOCATIONS-BY-ID
+
+curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}/18 \
+  -H "Authorization: {{ACCESS_TOKEN}}"
+###GET-LOCATIONS-BY-HANDASAH-NAME
+
+curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}?handasah_name=IT \
+  -H "Authorization: {{ACCESS_TOKEN}}"
+###GET-LOCATIONS-BY-PENDING
+
+curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}?pending=true \
+  -H "Authorization: {{ACCESS_TOKEN}}"
+
+
+###CREATE-LOCATION
+curl --request -X POST {{BASE_IP}}{{LOCTIONS_END_POINT}} \
+  -H "Content-Type: application/json" \
+  -H "Authorization: {{ACCESS_TOKEN}}" \
+  -d '{
+
+    "Address": "123 Main St, alex company",
+      "Latitude": "30.0444",
+      "Longitude": "31.2357",
+      "Flag": 0,
+      "Gis_Url": "https//www.localhost:8080/gis",
+      "Handasah_Name": "IT",
+      "Technical_Name": "Ahmed Shaltout",
+      "Is_Finished": 0,
+      "Is_Approved": 0,
+      "Caller_Name": "Ahmed Ali",
+      "Broken_Type": "Water leak",
+      "Caller_Number": "01234567890",
+      "Video_Call": 0
+  }'
+
+
