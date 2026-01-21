@@ -1,5 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
+import 'dart:developer';
+
 class Location {
   final int? id;
   final String address;
@@ -35,26 +37,6 @@ class Location {
     this.videoCall,
   });
 
-  // factory Location.fromJson(Map<String, dynamic> json) {
-  //   return Location(
-  //     id: _parseIntSafe(json['ID']),
-  //     address:
-  //         json['Address']?.toString() ?? '', // Handle null and provide default
-  //     latitude: json['Latitude']?.toString(),
-  //     longitude: json['Longitude']?.toString(),
-  //     date: _parseDateSafe(json['Date']),
-  //     flag: _parseIntSafe(json['Flag']),
-  //     gisUrl: json['Gis_Url']?.toString(),
-  //     handasahName: json['Handasah_Name']?.toString(),
-  //     technicalName: json['Technical_Name']?.toString(),
-  //     isFinished: _parseIntSafe(json['Is_Finished']) ?? 0,
-  //     isApproved: _parseIntSafe(json['Is_Approved']) ?? 0,
-  //     callerName: json['Caller_Name']?.toString(),
-  //     brokenType: json['Broken_Type']?.toString(),
-  //     callerNumber: json['Caller_Number']?.toString(),
-  //     videoCall: _parseIntSafe(json['Video_Call']),
-  //   );
-  // }
   factory Location.fromJson(Map<String, dynamic> json) {
     return Location(
       id: _parseIntSafe(json['ID']),
@@ -76,22 +58,9 @@ class Location {
       videoCall: _parseIntSafe(json['Video_Call']),
     );
   }
-  // static int? _parseIntSafe(dynamic value) {
-  //   if (value == null) return null;
-  //   if (value is int) return value;
-  //   if (value is String) return int.tryParse(value);
-  //   return int.tryParse(value.toString());
-  // }
-
-  // static DateTime _parseDateSafe(dynamic value) {
-  //   if (value == null) return DateTime.now();
-  //   if (value is DateTime) return value;
-  //   if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
-  //   return DateTime.now();
-  // }
 
   static DateTime _parseDateSafe(dynamic value) {
-    print(
+    log(
       '_parseDateSafe input: $value (type: ${value.runtimeType})',
     ); // ADD THIS
     if (value == null) return DateTime.now();
@@ -101,7 +70,7 @@ class Location {
   }
 
   static int? _parseIntSafe(dynamic value) {
-    print(
+    log(
       '_parseIntSafe input: $value (type: ${value.runtimeType})',
     ); // ADD THIS
     if (value == null) return null;
