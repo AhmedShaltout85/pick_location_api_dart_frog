@@ -1,76 +1,647 @@
-@BASE_IP= http://localhost:8080
-@AUTH_LOGIN = /auth/login 
-@AUTH_REGISTER = /auth/register
-@LOCTIONS_END_POINT = /locations
-@USER_END_POINT = /users
-@ACCESS_TOKEN= Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMDMsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoxLCJleHAiOjE3NjkwMjU4ODIsImlhdCI6MTc2ODkzOTQ4Mn0.N9fNxBno3GmcXDPL0ugZgxOd7BEZDXTtN4kGVaC5PzM
+### API Configuration
+@BASE_URL = http://localhost:8080
+@API_VERSION = v1
 
 
-###CREATE-USER
-curl -X POST {{BASE_IP}}{{AUTH_REGISTER}} \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "admin",
-    "password": "admin123",
-    "role": 1,
-    "control_unit": "Main Unit",
-    "technical_id": 1
-  }'
-
-###LOGIN
-curl -X POST {{BASE_IP}}{{AUTH_LOGIN}} \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "admin",
-    "password": "admin123"
-  }'
-
-###GET-USERS
-GET {{BASE_IP}}{{USER_END_POINT}}
-Authorization: {{ACCESS_TOKEN}}
-
-###GET-USER-BY-ID
-GET {{BASE_IP}}{{USER_END_POINT}}/1003
-Authorization: {{ACCESS_TOKEN}}
-
-###GET-LOCATIONS
-
-curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}\
-  -H "Authorization: {{ACCESS_TOKEN}}"
-
-###GET-LOCATIONS-BY-ID
-
-curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}/18 \
-  -H "Authorization: {{ACCESS_TOKEN}}"
-###GET-LOCATIONS-BY-HANDASAH-NAME
-
-curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}?handasah_name=IT \
-  -H "Authorization: {{ACCESS_TOKEN}}"
-###GET-LOCATIONS-BY-PENDING
-
-curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}?pending=true \
-  -H "Authorization: {{ACCESS_TOKEN}}"
+### Authentication Tokens
+@ADMIN_TOKEN = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMDMsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoxLCJleHAiOjE3NjkwMjU4ODIsImlhdCI6MTc2ODkzOTQ4Mn0.N9fNxBno3GmcXDPL0ugZgxOd7BEZDXTtN4kGVaC5PzM
+@TECHNICIAN_TOKEN = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMDMsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoxLCJleHAiOjE3NjkwMjU4ODIsImlhdCI6MTc2ODkzOTQ4Mn0.N9fNxBno3GmcXDPL0ugZgxOd7BEZDXTtN4kGVaC5PzM
 
 
-###CREATE-LOCATION
-curl --request -X POST {{BASE_IP}}{{LOCTIONS_END_POINT}} \
-  -H "Content-Type: application/json" \
-  -H "Authorization: {{ACCESS_TOKEN}}" \
-  -d '{
-
-    "Address": "123 Main St, alex company",
-      "Latitude": "30.0444",
-      "Longitude": "31.2357",
-      "Flag": 0,
-      "Gis_Url": "https//www.localhost:8080/gis",
-      "Handasah_Name": "IT",
-      "Technical_Name": "Ahmed Shaltout",
-      "Is_Finished": 0,
-      "Is_Approved": 0,
-      "Caller_Name": "Ahmed Ali",
-      "Broken_Type": "Water leak",
-      "Caller_Number": "01234567890",
-      "Video_Call": 0
-  }'
+### USER ID
+@CREATED_USER_ID = 1003
 
 
+### CURRENT LOCATION ID
+@CREATED_LOCATION_ID = 1
+
+
+### Common Headers
+@JSON_CONTENT = application/json
+@AUTH_HEADER = Authorization
+
+
+### --------------------------------------------
+
+
+### AUTHENTICATION ENDPOINTS
+
+
+### --------------------------------------------
+
+
+### 1. USER REGISTRATION (Create new user)
+# @name registerUser
+POST {{BASE_URL}}/auth/register
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "user_name": "admin",
+  "user_password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",  // SHA-256 of 'admin123'
+  "role": 1,
+  "control_unit": "Main Unit",
+  "technical_id": 1
+}
+
+
+### 2. USER LOGIN
+# @name loginUser
+POST {{BASE_URL}}/auth/login
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "user_name": "admin",
+  "user_password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+}
+
+
+### Save token from login response
+> {%
+client.test("Login successful", function() {
+client.assert(response.status === 200, `Login failed with status ${response.status}`);
+client.assert(response.body.access_token, "No access token in response");
+
+// Save the token for subsequent requests
+const token = response.body.access_token;
+client.global.set("CURRENT_TOKEN", `Bearer ${token}`);
+console.log("Token saved:", token.substring(0, 50) + "...");
+});
+%}
+
+
+### 3. LOGIN WITH PLAIN PASSWORD (if backend hashes it)
+# @name loginWithPlainPassword
+POST {{BASE_URL}}/auth/login
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "user_name": "admin",
+  "user_password": "admin123"
+}
+
+
+### --------------------------------------------
+
+
+### USER MANAGEMENT ENDPOINTS
+
+
+### --------------------------------------------
+
+
+### 1. GET ALL USERS
+# @name getAllUsers
+GET {{BASE_URL}}/users
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+> {%
+  client.test("Users fetched successfully", function() {
+    client.assert(response.status === 200, `Failed to fetch users: ${response.status}`);
+    client.assert(Array.isArray(response.body), "Response is not an array");
+    
+    // Validate user structure
+    if (response.body.length > 0) {
+      const user = response.body[0];
+      client.assert(user.hasOwnProperty('user_name'), "User missing user_name");
+      client.assert(user.hasOwnProperty('role'), "User missing role");
+      client.assert(user.hasOwnProperty('control_unit'), "User missing control_unit");
+      
+      // Note: user_password should NOT be in response unless explicitly requested
+      client.assert(!user.hasOwnProperty('user_password'), 
+        "User password should not be exposed in GET response");
+    }
+  });
+%}
+
+
+### 2. GET USER BY ID
+# @name getUserById
+GET {{BASE_URL}}/users/1003
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+> {%
+  client.test("User fetched successfully", function() {
+    client.assert(response.status === 200, `Failed to fetch user: ${response.status}`);
+    
+    const user = response.body;
+    client.assert(user.id === 1003, `Expected ID 1003, got ${user.id}`);
+    client.assert(user.user_name, "User missing username");
+    console.log("User fetched:", user.user_name, "Role:", user.role);
+  });
+%}
+
+
+### 3. CREATE NEW USER (Admin only)
+# @name createUser
+POST {{BASE_URL}}/users
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "user_name": "technician_ahmed",
+  "user_password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",  // SHA-256 of '123456'
+  "role": 2,
+  "control_unit": "Technical Department",
+  "technical_id": 5,
+  "email": "ahmed.tech@company.com",
+  "phone": "+201234567891"
+}
+
+> {%
+  client.test("User created successfully", function() {
+    client.assert(response.status === 201, `Failed to create user: ${response.status}`);
+    client.assert(response.body.id, "No user ID in response");
+    
+    // Save the created user ID
+    client.global.set("CREATED_USER_ID", response.body.id);
+    console.log("Created user ID:", response.body.id);
+  });
+%}
+
+
+### 4. UPDATE USER PROFILE
+# @name updateUser
+PUT {{BASE_URL}}/users/{{CREATED_USER_ID}}
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "control_unit": "Updated Technical Department",
+  "email": "updated.ahmed@company.com",
+  "phone": "+201234567892"
+}
+
+
+### 5. UPDATE USER PASSWORD
+# @name updateUserPassword
+PATCH {{BASE_URL}}/users/{{CREATED_USER_ID}}/password
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "current_password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+  "new_password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"  // SHA-256 of '123'
+}
+
+
+### 6. DELETE USER
+# @name deleteUser
+DELETE {{BASE_URL}}/users/{{CREATED_USER_ID}}
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+
+
+### 7. GET USERS BY ROLE
+# @name getUsersByRole
+GET {{BASE_URL}}/users?role=2
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 8. GET USERS BY CONTROL UNIT
+# @name getUsersByUnit
+GET {{BASE_URL}}/users?control_unit=Technical%20Department
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### --------------------------------------------
+
+
+### LOCATION MANAGEMENT ENDPOINTS
+
+
+### --------------------------------------------
+
+
+### 1. GET ALL LOCATIONS
+# @name getAllLocations
+GET {{BASE_URL}}/locations
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+> {%
+  client.test("Locations fetched successfully", function() {
+    client.assert(response.status === 200, `Failed to fetch locations: ${response.status}`);
+    client.assert(Array.isArray(response.body), "Response is not an array");
+    
+    // Validate location structure
+    if (response.body.length > 0) {
+      const location = response.body[0];
+      client.assert(location.hasOwnProperty('Address'), "Location missing Address");
+      client.assert(location.hasOwnProperty('Date'), "Location missing Date");
+      client.assert(location.hasOwnProperty('Is_Finished'), "Location missing Is_Finished");
+      client.assert(location.hasOwnProperty('Is_Approved'), "Location missing Is_Approved");
+    }
+  });
+%}
+
+
+### 2. GET LOCATION BY ID
+# @name getLocationById
+GET {{BASE_URL}}/locations/18
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+> {%
+  client.test("Location fetched successfully", function() {
+    client.assert(response.status === 200, `Failed to fetch location: ${response.status}`);
+    
+    const location = response.body;
+    console.log("Location details:");
+    console.log("- Address:", location.Address);
+    console.log("- Handasah Name:", location.Handasah_Name);
+    console.log("- Status:", location.Is_Finished ? "Finished" : "Pending");
+    console.log("- Approved:", location.Is_Approved ? "Yes" : "No");
+  });
+%}
+
+
+### 3. CREATE NEW LOCATION
+# @name createLocation
+POST {{BASE_URL}}/locations
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "Address": "123 Main Street, Alexandria",
+  "Latitude": "31.2001",
+  "Longitude": "29.9187",
+  "Flag": 0,
+  "Gis_Url": "http://gis.company.com/location/123",
+  "Handasah_Name": "IT Department",
+  "Technical_Name": "Ahmed Shaltout",
+  "Is_Finished": 0,
+  "Is_Approved": 0,
+  "Caller_Name": "Mohamed Ali",
+  "Broken_Type": "Water Leak",
+  "Caller_Number": "01234567890",
+  "Video_Call": 0
+}
+
+> {%
+  client.test("Location created successfully", function() {
+    client.assert(response.status === 201, `Failed to create location: ${response.status}`);
+    client.assert(response.body.ID, "No location ID in response");
+    
+    // Save the created location ID
+    client.global.set("CREATED_LOCATION_ID", response.body.ID);
+    console.log("Created location ID:", response.body.ID);
+  });
+%}
+
+
+### 4. UPDATE LOCATION
+# @name updateLocation
+PUT {{BASE_URL}}/locations/{{CREATED_LOCATION_ID}}
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "Is_Finished": 1,
+  "Is_Approved": 1,
+  "Technical_Name": "Updated Technician",
+  "Flag": 1,
+  "Broken_Type": "Resolved - Water Leak"
+}
+
+
+### 5. PARTIAL UPDATE LOCATION
+# @name patchLocation
+PATCH {{BASE_URL}}/locations/{{CREATED_LOCATION_ID}}
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "Is_Finished": 1
+}
+
+
+### 6. DELETE LOCATION
+# @name deleteLocation
+DELETE {{BASE_URL}}/locations/{{CREATED_LOCATION_ID}}
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+
+
+### 7. GET LOCATIONS WITH FILTERS
+# @name getLocationsFiltered
+GET {{BASE_URL}}/locations?handasah_name=IT&pending=true
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+> {%
+  client.test("Filtered locations fetched", function() {
+    client.assert(response.status === 200, `Failed to filter locations: ${response.status}`);
+    
+    const locations = response.body;
+    console.log(`Found ${locations.length} locations with filter`);
+    
+    // Verify filter worked
+    if (locations.length > 0) {
+      locations.forEach(loc => {
+        client.assert(loc.Handasah_Name.includes('IT'), 
+          `Location ${loc.ID} not filtered correctly: ${loc.Handasah_Name}`);
+      });
+    }
+  });
+%}
+
+
+### 8. GET PENDING LOCATIONS (Is_Finished = 0)
+# @name getPendingLocations
+GET {{BASE_URL}}/locations?is_finished=0
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 9. GET APPROVED LOCATIONS (Is_Approved = 1)
+# @name getApprovedLocations
+GET {{BASE_URL}}/locations?is_approved=1
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 10. GET LOCATIONS BY TECHNICIAN
+# @name getLocationsByTechnician
+GET {{BASE_URL}}/locations?technical_name=Ahmed%20Shaltout
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 11. GET LOCATIONS BY BROKEN TYPE
+# @name getLocationsByBrokenType
+GET {{BASE_URL}}/locations?broken_type=Water%20Leak
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 12. SEARCH LOCATIONS BY ADDRESS
+# @name searchLocations
+GET {{BASE_URL}}/locations/search?q=Main%20Street
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 13. GET LOCATIONS BY DATE RANGE
+# @name getLocationsByDate
+GET {{BASE_URL}}/locations/date-range?start=2024-01-01&end=2024-01-31
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 14. GET LOCATION STATISTICS
+# @name getLocationStats
+GET {{BASE_URL}}/locations/stats
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### --------------------------------------------
+
+
+### TECHNICIAN-SPECIFIC ENDPOINTS
+
+
+### --------------------------------------------
+
+
+### 1. GET MY ASSIGNED LOCATIONS (for technician)
+# @name getMyLocations
+GET {{BASE_URL}}/locations/assigned
+{{AUTH_HEADER}}: {{TECHNICIAN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 2. UPDATE LOCATION STATUS (technician)
+# @name updateLocationStatus
+PATCH {{BASE_URL}}/locations/{{CREATED_LOCATION_ID}}/status
+{{AUTH_HEADER}}: {{TECHNICIAN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "is_finished": 1,
+  "notes": "Issue resolved successfully"
+}
+
+
+### 3. GET LOCATIONS NEEDING APPROVAL
+# @name getLocationsForApproval
+GET {{BASE_URL}}/locations/approval-needed
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 4. APPROVE LOCATION
+# @name approveLocation
+POST {{BASE_URL}}/locations/{{CREATED_LOCATION_ID}}/approve
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "approved_by": "admin",
+  "approval_notes": "Work completed satisfactorily"
+}
+
+
+### --------------------------------------------
+
+
+### BATCH OPERATIONS
+
+
+### --------------------------------------------
+
+
+### 1. BATCH UPDATE LOCATION STATUS
+# @name batchUpdateLocations
+POST {{BASE_URL}}/locations/batch-update
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+{
+  "location_ids": [18, 19, 20],
+  "updates": {
+    "is_finished": 1,
+    "flag": 2
+  }
+}
+
+
+### 2. IMPORT LOCATIONS FROM CSV/JSON
+# @name importLocations
+POST {{BASE_URL}}/locations/import
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+[
+  {
+    "Address": "456 Oak Street, Cairo",
+    "Handasah_Name": "Electrical",
+    "Broken_Type": "Power Outage",
+    "Caller_Name": "Omar Hassan",
+    "Caller_Number": "01123456789"
+  },
+  {
+    "Address": "789 Pine Road, Giza",
+    "Handasah_Name": "Plumbing",
+    "Broken_Type": "Pipe Burst",
+    "Caller_Name": "Sara Mohamed",
+    "Caller_Number": "01098765432"
+  }
+]
+
+
+### --------------------------------------------
+
+
+### REPORTING & ANALYTICS
+
+
+### --------------------------------------------
+
+
+### 1. GET DAILY REPORT
+# @name getDailyReport
+GET {{BASE_URL}}/reports/daily?date=2024-01-24
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 2. GET MONTHLY STATISTICS
+# @name getMonthlyStats
+GET {{BASE_URL}}/reports/monthly?year=2024&month=1
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 3. GET TECHNICIAN PERFORMANCE
+# @name getTechnicianPerformance
+GET {{BASE_URL}}/reports/technician-performance?technician_id=5
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 4. EXPORT LOCATIONS TO CSV
+# @name exportLocations
+GET {{BASE_URL}}/locations/export?format=csv
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Accept: text/csv
+
+
+### --------------------------------------------
+
+
+### SYSTEM & HEALTH ENDPOINTS
+
+
+### --------------------------------------------
+
+
+### 1. HEALTH CHECK
+# @name healthCheck
+GET {{BASE_URL}}/health
+Content-Type: {{JSON_CONTENT}}
+
+> {%
+  client.test("Service is healthy", function() {
+    client.assert(response.status === 200, "Service is not healthy");
+    client.assert(response.body.status === "healthy", 
+      `Service status: ${response.body.status}`);
+  });
+%}
+
+
+### 2. API INFORMATION
+# @name getApiInfo
+GET {{BASE_URL}}/
+Content-Type: {{JSON_CONTENT}}
+
+
+### 3. DATABASE STATUS
+# @name getDbStatus
+GET {{BASE_URL}}/system/db-status
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+
+### 4. CLEAR TEST DATA (Development only)
+# @name clearTestData
+POST {{BASE_URL}}/system/clear-test-data
+{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+Content-Type: {{JSON_CONTENT}}
+
+# @BASE_IP= http://localhost:8080
+# @AUTH_LOGIN = /auth/login 
+# @AUTH_REGISTER = /auth/register
+# @LOCTIONS_END_POINT = /locations
+# @USER_END_POINT = /users
+# @ACCESS_TOKEN= Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMDMsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoxLCJleHAiOjE3NjkwMjU4ODIsImlhdCI6MTc2ODkzOTQ4Mn0.N9fNxBno3GmcXDPL0ugZgxOd7BEZDXTtN4kGVaC5PzM
+
+
+# ###CREATE-USER
+# curl -X POST {{BASE_IP}}{{AUTH_REGISTER}} \
+#   -H "Content-Type: application/json" \
+#   -d '{
+#     "username": "admin",
+#     "password": "admin123",
+#     "role": 1,
+#     "control_unit": "Main Unit",
+#     "technical_id": 1
+#   }'
+
+# ###LOGIN
+# curl -X POST {{BASE_IP}}{{AUTH_LOGIN}} \
+#   -H "Content-Type: application/json" \
+#   -d '{
+#     "username": "admin",
+#     "password": "admin123"
+#   }'
+
+# ###GET-USERS
+# GET {{BASE_IP}}{{USER_END_POINT}}
+# Authorization: {{ACCESS_TOKEN}}
+
+# ###GET-USER-BY-ID
+# GET {{BASE_IP}}{{USER_END_POINT}}/1003
+# Authorization: {{ACCESS_TOKEN}}
+
+# ###GET-LOCATIONS
+
+# curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}\
+#   -H "Authorization: {{ACCESS_TOKEN}}"
+
+# ###GET-LOCATIONS-BY-ID
+
+# curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}/18 \
+#   -H "Authorization: {{ACCESS_TOKEN}}"
+# ###GET-LOCATIONS-BY-HANDASAH-NAME
+
+# curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}?handasah_name=IT \
+#   -H "Authorization: {{ACCESS_TOKEN}}"
+# ###GET-LOCATIONS-BY-PENDING
+
+# curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}?pending=true \
+#   -H "Authorization: {{ACCESS_TOKEN}}"
+
+
+# ###CREATE-LOCATION
+# curl --request -X POST {{BASE_IP}}{{LOCTIONS_END_POINT}} \
+#   -H "Content-Type: application/json" \
+#   -H "Authorization: {{ACCESS_TOKEN}}" \
+#   -d '{
+
+#     "Address": "123 Main St, alex company",
+#       "Latitude": "30.0444",
+#       "Longitude": "31.2357",
+#       "Flag": 0,
+#       "Gis_Url": "https//www.localhost:8080/gis",
+#       "Handasah_Name": "IT",
+#       "Technical_Name": "Ahmed Shaltout",
+#       "Is_Finished": 0,
+#       "Is_Approved": 0,
+#       "Caller_Name": "Ahmed Ali",
+#       "Broken_Type": "Water leak",
+#       "Caller_Number": "01234567890",
+#       "Video_Call": 0
+#   }'

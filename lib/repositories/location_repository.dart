@@ -6,7 +6,7 @@ import 'package:pick_location_api/models/location.dart';
 
 class LocationRepository {
   /// Clean ODBC row data by removing NULL bytes from keys and string values
-  /// This fixes a bug in dart_odbc where fixed-width buffers aren't properly trimmed
+  /// This fixes a bug in dart_odbc where fixed-width buffers aren't properly
   Map<String, dynamic> _cleanOdbcRow(Map<String, dynamic> row) {
     final cleanRow = <String, dynamic>{};
 
