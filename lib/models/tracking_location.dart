@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
-class TrackingLocation {
+import 'package:equatable/equatable.dart';
+
+class TrackingLocation extends Equatable {
   final int? id;
   final String? address;
   final String? latitude;
@@ -11,7 +13,7 @@ class TrackingLocation {
   final String? currentLatitude;
   final String? currentLongitude;
 
-  TrackingLocation({
+  const TrackingLocation({
     this.id,
     this.address,
     this.latitude,
@@ -50,4 +52,17 @@ class TrackingLocation {
       'current_longitude': currentLongitude,
     };
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        address,
+        latitude,
+        longitude,
+        technicalName,
+        startLatitude,
+        startLongitude,
+        currentLatitude,
+        currentLongitude,
+      ];
 }

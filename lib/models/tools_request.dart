@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
-class ToolsRequest {
+import 'package:equatable/equatable.dart';
+
+class ToolsRequest extends Equatable {
   final int? id;
   final String? handasahName;
   final String? toolName;
@@ -11,7 +13,8 @@ class ToolsRequest {
   final DateTime date;
   final String? address;
 
-  ToolsRequest({
+  const ToolsRequest({
+    required this.date,
     this.id,
     this.handasahName,
     this.toolName,
@@ -19,7 +22,6 @@ class ToolsRequest {
     this.techName,
     this.requestStatus = 1,
     this.isApproved = 0,
-    required this.date,
     this.address,
   });
 
@@ -52,4 +54,17 @@ class ToolsRequest {
       'address': address,
     };
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        handasahName,
+        toolName,
+        toolQty,
+        techName,
+        requestStatus,
+        isApproved,
+        date,
+        address,
+      ];
 }

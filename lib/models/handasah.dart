@@ -1,12 +1,13 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first, always_put_required_named_parameters_first
+import 'package:equatable/equatable.dart';
 
-class PickLocationHandasah {
+class PickLocationHandasah extends Equatable {
   final int? id;
   final String handasahName;
   final String storeName;
   final int storeNumber;
 
-  PickLocationHandasah({
+  const PickLocationHandasah({
     this.id,
     required this.handasahName,
     required this.storeName,
@@ -30,6 +31,9 @@ class PickLocationHandasah {
       'store_number': storeNumber,
     };
   }
+
+  @override
+  List<Object?> get props => [id, handasahName, storeName, storeNumber];
 }
 
 class HandasatTool {

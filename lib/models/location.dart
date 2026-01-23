@@ -2,7 +2,9 @@
 
 import 'dart:developer';
 
-class Location {
+import 'package:equatable/equatable.dart';
+
+class Location extends Equatable {
   final int? id;
   final String address;
   final String? latitude;
@@ -19,7 +21,7 @@ class Location {
   final String? callerNumber;
   final int? videoCall;
 
-  Location({
+  const Location({
     required this.address,
     required this.date,
     this.id,
@@ -134,4 +136,23 @@ class Location {
       videoCall: videoCall ?? this.videoCall,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        address,
+        latitude,
+        longitude,
+        date,
+        flag,
+        gisUrl,
+        handasahName,
+        technicalName,
+        isFinished,
+        isApproved,
+        callerName,
+        brokenType,
+        callerNumber,
+        videoCall,
+      ];
 }
