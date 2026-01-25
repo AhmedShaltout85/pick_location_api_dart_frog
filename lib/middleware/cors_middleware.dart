@@ -1,7 +1,7 @@
 import 'package:dart_frog/dart_frog.dart';
 
 /// Middleware that adds CORS headers to the response.
-Handler middleware(Handler handler) {
+Handler activeCorsMiddleware(Handler handler) {
   return handler.use(corsMiddleware());
 }
 

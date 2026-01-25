@@ -1,0 +1,23 @@
+redis-cli
+docker exec -it redis-server redis-cli
+# See all keys
+KEYS *
+
+# See specific location cache
+GET location:1
+
+# See all locations cache
+GET locations:all
+
+# See pending locations
+GET locations:pending
+
+# See handasah-specific cache
+GET locations:handasah:Engineering
+
+# Check TTL (time to live)
+TTL location:1
+TTL locations:all
+
+# Monitor Redis commands in real-time
+MONITOR

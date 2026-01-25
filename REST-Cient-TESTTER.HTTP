@@ -1,11 +1,13 @@
 ### API Configuration
 @BASE_URL = http://localhost:8080
+@BASE_END_POINT= /api/
 @API_VERSION = v1
+@HEALTH_END_POINT= /test/health
 
 
 ### Authentication Tokens
-@ADMIN_TOKEN = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMDMsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoxLCJleHAiOjE3NjkwMjU4ODIsImlhdCI6MTc2ODkzOTQ4Mn0.N9fNxBno3GmcXDPL0ugZgxOd7BEZDXTtN4kGVaC5PzM
-@TECHNICIAN_TOKEN = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMDMsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoxLCJleHAiOjE3NjkwMjU4ODIsImlhdCI6MTc2ODkzOTQ4Mn0.N9fNxBno3GmcXDPL0ugZgxOd7BEZDXTtN4kGVaC5PzM
+@ADMIN_TOKEN = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIwMDIsInVzZXJuYW1lIjoiYWRtaW4xIiwicm9sZSI6MSwiZXhwIjoxNzY5NDUwNjk1LCJpYXQiOjE3NjkzNjQyOTV9.0LDL0tZocOegU2gaaKbNJdCkEUwgYXxcvrIO-oxSr5E
+@TECHNICIAN_TOKEN = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIwMDIsInVzZXJuYW1lIjoiYWRtaW4xIiwicm9sZSI6MSwiZXhwIjoxNzY5NDUwNjk1LCJpYXQiOjE3NjkzNjQyOTV9.0LDL0tZocOegU2gaaKbNJdCkEUwgYXxcvrIO-oxSr5E
 
 
 ### USER ID
@@ -36,8 +38,8 @@ POST {{BASE_URL}}/auth/register
 Content-Type: {{JSON_CONTENT}}
 
 {
-  "user_name": "admin",
-  "user_password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",  // SHA-256 of 'admin123'
+  "username": "admin1",
+  "password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",  
   "role": 1,
   "control_unit": "Main Unit",
   "technical_id": 1
@@ -50,8 +52,8 @@ POST {{BASE_URL}}/auth/login
 Content-Type: {{JSON_CONTENT}}
 
 {
-  "user_name": "admin",
-  "user_password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+  "username": "admin1",
+  "password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
 }
 
 
@@ -75,8 +77,8 @@ POST {{BASE_URL}}/auth/login
 Content-Type: {{JSON_CONTENT}}
 
 {
-  "user_name": "admin",
-  "user_password": "admin123"
+  "username": "admin",
+  "password": "admin123"
 }
 
 
@@ -91,7 +93,7 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 1. GET ALL USERS
 # @name getAllUsers
-GET {{BASE_URL}}/users
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -117,7 +119,7 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 2. GET USER BY ID
 # @name getUserById
-GET {{BASE_URL}}/users/1003
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users/1003
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -135,18 +137,16 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 3. CREATE NEW USER (Admin only)
 # @name createUser
-POST {{BASE_URL}}/users
+POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 {
-  "user_name": "technician_ahmed",
-  "user_password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",  // SHA-256 of '123456'
+  "username": "technician_ahmed",
+  "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",  // SHA-256 of '123456'
   "role": 2,
   "control_unit": "Technical Department",
-  "technical_id": 5,
-  "email": "ahmed.tech@company.com",
-  "phone": "+201234567891"
+  "technical_id": 5
 }
 
 > {%
@@ -163,20 +163,19 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 4. UPDATE USER PROFILE
 # @name updateUser
-PUT {{BASE_URL}}/users/{{CREATED_USER_ID}}
+PUT {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users/{{CREATED_USER_ID}}
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 {
   "control_unit": "Updated Technical Department",
-  "email": "updated.ahmed@company.com",
-  "phone": "+201234567892"
+
 }
 
 
 ### 5. UPDATE USER PASSWORD
 # @name updateUserPassword
-PATCH {{BASE_URL}}/users/{{CREATED_USER_ID}}/password
+PATCH {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users/{{CREATED_USER_ID}}/password
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -188,20 +187,20 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 6. DELETE USER
 # @name deleteUser
-DELETE {{BASE_URL}}/users/{{CREATED_USER_ID}}
+DELETE {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users/{{CREATED_USER_ID}}
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 
 
 ### 7. GET USERS BY ROLE
 # @name getUsersByRole
-GET {{BASE_URL}}/users?role=2
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users?role=2
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 
 ### 8. GET USERS BY CONTROL UNIT
 # @name getUsersByUnit
-GET {{BASE_URL}}/users?control_unit=Technical%20Department
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users?control_unit=Technical%20Department
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -217,7 +216,7 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 1. GET ALL LOCATIONS
 # @name getAllLocations
-GET {{BASE_URL}}/locations
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -240,7 +239,7 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 2. GET LOCATION BY ID
 # @name getLocationById
-GET {{BASE_URL}}/locations/18
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/18
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -260,12 +259,12 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 3. CREATE NEW LOCATION
 # @name createLocation
-POST {{BASE_URL}}/locations
+POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 {
-  "Address": "123 Main Street, Alexandria",
+  "Address": "61 Alhoriah Main Street, Alexandria",
   "Latitude": "31.2001",
   "Longitude": "29.9187",
   "Flag": 0,
@@ -294,7 +293,7 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 4. UPDATE LOCATION
 # @name updateLocation
-PUT {{BASE_URL}}/locations/{{CREATED_LOCATION_ID}}
+PUT {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/{{CREATED_LOCATION_ID}}
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -309,7 +308,7 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 5. PARTIAL UPDATE LOCATION
 # @name patchLocation
-PATCH {{BASE_URL}}/locations/{{CREATED_LOCATION_ID}}
+PATCH {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/{{CREATED_LOCATION_ID}}
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -320,13 +319,13 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 6. DELETE LOCATION
 # @name deleteLocation
-DELETE {{BASE_URL}}/locations/{{CREATED_LOCATION_ID}}
+DELETE {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/{{CREATED_LOCATION_ID}}
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 
 
 ### 7. GET LOCATIONS WITH FILTERS
 # @name getLocationsFiltered
-GET {{BASE_URL}}/locations?handasah_name=IT&pending=true
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations?handasah_name=IT&pending=true
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -350,49 +349,49 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 8. GET PENDING LOCATIONS (Is_Finished = 0)
 # @name getPendingLocations
-GET {{BASE_URL}}/locations?is_finished=0
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations?is_finished=0
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 
 ### 9. GET APPROVED LOCATIONS (Is_Approved = 1)
 # @name getApprovedLocations
-GET {{BASE_URL}}/locations?is_approved=1
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations?is_approved=1
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 
 ### 10. GET LOCATIONS BY TECHNICIAN
 # @name getLocationsByTechnician
-GET {{BASE_URL}}/locations?technical_name=Ahmed%20Shaltout
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations?technical_name=Ahmed%20Shaltout
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 
 ### 11. GET LOCATIONS BY BROKEN TYPE
 # @name getLocationsByBrokenType
-GET {{BASE_URL}}/locations?broken_type=Water%20Leak
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations?broken_type=Water%20Leak
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 
 ### 12. SEARCH LOCATIONS BY ADDRESS
 # @name searchLocations
-GET {{BASE_URL}}/locations/search?q=Main%20Street
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/search?q=Main%20Street
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 
 ### 13. GET LOCATIONS BY DATE RANGE
 # @name getLocationsByDate
-GET {{BASE_URL}}/locations/date-range?start=2024-01-01&end=2024-01-31
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/date-range?start=2026-01-01&end=2026-01-25
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 
 ### 14. GET LOCATION STATISTICS
 # @name getLocationStats
-GET {{BASE_URL}}/locations/stats
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/stats
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -408,14 +407,14 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 1. GET MY ASSIGNED LOCATIONS (for technician)
 # @name getMyLocations
-GET {{BASE_URL}}/locations/assigned
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/assigned
 {{AUTH_HEADER}}: {{TECHNICIAN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 
 ### 2. UPDATE LOCATION STATUS (technician)
 # @name updateLocationStatus
-PATCH {{BASE_URL}}/locations/{{CREATED_LOCATION_ID}}/status
+PATCH {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/{{CREATED_LOCATION_ID}}/status
 {{AUTH_HEADER}}: {{TECHNICIAN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -427,14 +426,14 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 3. GET LOCATIONS NEEDING APPROVAL
 # @name getLocationsForApproval
-GET {{BASE_URL}}/locations/approval-needed
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/approval-needed
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 
 ### 4. APPROVE LOCATION
 # @name approveLocation
-POST {{BASE_URL}}/locations/{{CREATED_LOCATION_ID}}/approve
+POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/{{CREATED_LOCATION_ID}}/approve
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -455,7 +454,7 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 1. BATCH UPDATE LOCATION STATUS
 # @name batchUpdateLocations
-POST {{BASE_URL}}/locations/batch-update
+POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/batch-update
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -470,7 +469,7 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 2. IMPORT LOCATIONS FROM CSV/JSON
 # @name importLocations
-POST {{BASE_URL}}/locations/import
+POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/import
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -503,14 +502,14 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 1. GET DAILY REPORT
 # @name getDailyReport
-GET {{BASE_URL}}/reports/daily?date=2024-01-24
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/reports/daily?date=2024-01-24
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
 
 ### 2. GET MONTHLY STATISTICS
 # @name getMonthlyStats
-GET {{BASE_URL}}/reports/monthly?year=2024&month=1
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/reports/monthly?year=2024&month=1
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
@@ -524,7 +523,7 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 4. EXPORT LOCATIONS TO CSV
 # @name exportLocations
-GET {{BASE_URL}}/locations/export?format=csv
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/export?format=csv
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Accept: text/csv
 
@@ -570,78 +569,96 @@ Content-Type: {{JSON_CONTENT}}
 POST {{BASE_URL}}/system/clear-test-data
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
-
-# @BASE_IP= http://localhost:8080
-# @AUTH_LOGIN = /auth/login 
-# @AUTH_REGISTER = /auth/register
-# @LOCTIONS_END_POINT = /locations
-# @USER_END_POINT = /users
-# @ACCESS_TOKEN= Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMDMsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoxLCJleHAiOjE3NjkwMjU4ODIsImlhdCI6MTc2ODkzOTQ4Mn0.N9fNxBno3GmcXDPL0ugZgxOd7BEZDXTtN4kGVaC5PzM
-
-
-# ###CREATE-USER
-# curl -X POST {{BASE_IP}}{{AUTH_REGISTER}} \
-#   -H "Content-Type: application/json" \
-#   -d '{
-#     "username": "admin",
-#     "password": "admin123",
-#     "role": 1,
-#     "control_unit": "Main Unit",
-#     "technical_id": 1
-#   }'
-
-# ###LOGIN
-# curl -X POST {{BASE_IP}}{{AUTH_LOGIN}} \
-#   -H "Content-Type: application/json" \
-#   -d '{
-#     "username": "admin",
-#     "password": "admin123"
-#   }'
-
-# ###GET-USERS
-# GET {{BASE_IP}}{{USER_END_POINT}}
-# Authorization: {{ACCESS_TOKEN}}
-
-# ###GET-USER-BY-ID
-# GET {{BASE_IP}}{{USER_END_POINT}}/1003
-# Authorization: {{ACCESS_TOKEN}}
-
-# ###GET-LOCATIONS
-
-# curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}\
-#   -H "Authorization: {{ACCESS_TOKEN}}"
-
-# ###GET-LOCATIONS-BY-ID
-
-# curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}/18 \
-#   -H "Authorization: {{ACCESS_TOKEN}}"
-# ###GET-LOCATIONS-BY-HANDASAH-NAME
-
-# curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}?handasah_name=IT \
-#   -H "Authorization: {{ACCESS_TOKEN}}"
-# ###GET-LOCATIONS-BY-PENDING
-
-# curl --request -X GET  {{BASE_IP}}{{LOCTIONS_END_POINT}}?pending=true \
-#   -H "Authorization: {{ACCESS_TOKEN}}"
+# =======================================================
+@BASE_IP= http://localhost:8080
+@AUTH_LOGIN = /auth/login
+@AUTH_REGISTER = /auth/register
+@LOCTIONS_END_POINT = /locations
+@USER_END_POINT = /users
+@ACCESS_TOKEN= Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEwMDMsInVzZXJuYW1lIjoiYWRtaW4iLCJyb2xlIjoxLCJleHAiOjE3NjkwMjU4ODIsImlhdCI6MTc2ODkzOTQ4Mn0.N9fNxBno3GmcXDPL0ugZgxOd7BEZDXTtN4kGVaC5PzM
 
 
-# ###CREATE-LOCATION
-# curl --request -X POST {{BASE_IP}}{{LOCTIONS_END_POINT}} \
-#   -H "Content-Type: application/json" \
-#   -H "Authorization: {{ACCESS_TOKEN}}" \
-#   -d '{
+###CREATE-USER
+curl -X POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{AUTH_REGISTER}} \
+-H "Content-Type: application/json" \
+-d '{
+"username": "admin",
+"password": "admin123",
+"role": 1,
+"control_unit": "Main Unit",
+"technical_id": 1
+}'
 
-#     "Address": "123 Main St, alex company",
-#       "Latitude": "30.0444",
-#       "Longitude": "31.2357",
-#       "Flag": 0,
-#       "Gis_Url": "https//www.localhost:8080/gis",
-#       "Handasah_Name": "IT",
-#       "Technical_Name": "Ahmed Shaltout",
-#       "Is_Finished": 0,
-#       "Is_Approved": 0,
-#       "Caller_Name": "Ahmed Ali",
-#       "Broken_Type": "Water leak",
-#       "Caller_Number": "01234567890",
-#       "Video_Call": 0
-#   }'
+
+###LOGIN
+curl -X POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{AUTH_LOGIN}} \
+-H "Content-Type: application/json" \
+-d '{
+"username": "admin",
+"password": "admin123"
+}'
+
+
+###GET-USERS
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{USER_END_POINT}}
+Authorization: {{ACCESS_TOKEN}}
+
+
+###GET-USER-BY-ID
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{USER_END_POINT}}/1003
+Authorization: {{ADMIN_TOKEN}}
+
+
+###GET-LOCATIONS
+curl --request -X GET  {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{LOCTIONS_END_POINT}} \
+-H "Authorization: {{ADMIN_TOKEN}}"
+
+
+###GET-LOCATIONS-BY-ID
+curl --request -X GET  {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{LOCTIONS_END_POINT}}/18 \
+-H "Authorization: {{ADMIN_TOKEN}}"
+
+
+###GET-LOCATIONS-BY-HANDASAH-NAME
+curl --request -X GET  {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{LOCTIONS_END_POINT}}?handasah_name=IT \
+-H "Authorization: {{ADMIN_TOKEN}}"
+
+
+###GET-LOCATIONS-BY-PENDING
+curl --request -X GET  {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{LOCTIONS_END_POINT}}?pending=true \
+-H "Authorization: {{ADMIN_TOKEN}}"
+
+
+###CREATE-LOCATION
+curl --request -X POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{LOCTIONS_END_POINT}} \
+-H "Content-Type: application/json" \
+-H "Authorization: {{ADMIN_TOKEN}}" \
+-d '{
+
+    "Address": "61 Alhoriah St, alex company",
+      "Latitude": "30.0444",
+      "Longitude": "31.2357",
+      "Flag": 0,
+      "Gis_Url": "https//www.localhost:8080/gis",
+      "Handasah_Name": "IT",
+      "Technical_Name": "Ahmed Shaltout",
+      "Is_Finished": 0,
+      "Is_Approved": 0,
+      "Caller_Name": "Ahmed M. Ali",
+      "Broken_Type": "Water leak",
+      "Caller_Number": "01234567890",
+      "Video_Call": 0
+  }'
+
+  ### ============================================
+
+
+### HEALTH & CACHE ENDPOINTS
+
+
+### ============================================
+
+
+### Health Check (Redis)
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{HEALTH_END_POINT}}
+Content-Type: application/json

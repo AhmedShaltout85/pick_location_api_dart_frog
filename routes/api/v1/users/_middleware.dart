@@ -5,6 +5,6 @@ import 'package:pick_location_api/middleware/cors_middleware.dart';
 Handler middleware(Handler handler) {
   return handler
       .use(authMiddleware())
-      .use(corsMiddleware())
+      .use(activeCorsMiddleware)
       .use(requestLogger());
 }

@@ -1,0 +1,27 @@
+
+# Check running containers
+docker ps
+
+# Stop Redis
+docker stop redis-server
+
+# Remove Redis container
+docker rm redis-server
+
+# Run Redis with port mapping
+docker run -d --name redis-server -p 6379:6379 redis:latest
+
+# View Redis logs
+docker logs redis-server
+
+# Execute redis-cli inside container
+docker exec -it redis-server redis-cli
+
+# Restart Redis
+docker restart redis-server
+
+# Stop Redis
+docker stop redis-server
+
+# Start existing Redis
+docker start redis-server
