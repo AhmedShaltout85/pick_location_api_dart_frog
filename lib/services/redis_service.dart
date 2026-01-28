@@ -1,10 +1,11 @@
 // ignore_for_file: avoid_print, strict_raw_type, unnecessary_lambdas
 
-import 'package:redis/redis.dart';
 import 'dart:convert';
+import 'package:redis/redis.dart';
 
 /// Redis service
 class RedisService {
+  /// Singleton
   factory RedisService() => _instance;
   RedisService._internal();
   RedisConnection? _connection;
@@ -41,7 +42,7 @@ class RedisService {
   Future<void> disconnect() async {
     if (!_isConnected) return;
 
-    _connection?.close();
+    await _connection?.close();
     _isConnected = false;
     _command = null;
     _connection = null;

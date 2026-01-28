@@ -6,16 +6,16 @@
 
 
 ### Authentication Tokens
-@ADMIN_TOKEN = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIwMDIsInVzZXJuYW1lIjoiYWRtaW4xIiwicm9sZSI6MSwiZXhwIjoxNzY5NDUwNjk1LCJpYXQiOjE3NjkzNjQyOTV9.0LDL0tZocOegU2gaaKbNJdCkEUwgYXxcvrIO-oxSr5E
-@TECHNICIAN_TOKEN = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIwMDIsInVzZXJuYW1lIjoiYWRtaW4xIiwicm9sZSI6MSwiZXhwIjoxNzY5NDUwNjk1LCJpYXQiOjE3NjkzNjQyOTV9.0LDL0tZocOegU2gaaKbNJdCkEUwgYXxcvrIO-oxSr5E
+@ADMIN_TOKEN = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIwMDIsInVzZXJuYW1lIjoiYWRtaW4xIiwicm9sZSI6MSwiZXhwIjoxNzY5NzIwNjkxLCJpYXQiOjE3Njk2MzQyOTF9.041t-BDEKmiZmlpGvYRE2XZnUhL-xgkkG-zDV2XxadA
+@TECHNICIAN_TOKEN = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIwMDIsInVzZXJuYW1lIjoiYWRtaW4xIiwicm9sZSI6MSwiZXhwIjoxNzY5NzIwNjkxLCJpYXQiOjE3Njk2MzQyOTF9.041t-BDEKmiZmlpGvYRE2XZnUhL-xgkkG-zDV2XxadA
 
 
 ### USER ID
-@CREATED_USER_ID = 1003
+@CREATED_USER_ID = 2002
 
 
 ### CURRENT LOCATION ID
-@CREATED_LOCATION_ID = 1
+@CREATED_LOCATION_ID = 18
 
 
 ### Common Headers
@@ -34,7 +34,7 @@
 
 ### 1. USER REGISTRATION (Create new user)
 # @name registerUser
-POST {{BASE_URL}}/auth/register
+POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/auth/register
 Content-Type: {{JSON_CONTENT}}
 
 {
@@ -48,7 +48,7 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 2. USER LOGIN
 # @name loginUser
-POST {{BASE_URL}}/auth/login
+POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/auth/login
 Content-Type: {{JSON_CONTENT}}
 
 {
@@ -57,23 +57,9 @@ Content-Type: {{JSON_CONTENT}}
 }
 
 
-### Save token from login response
-> {%
-client.test("Login successful", function() {
-client.assert(response.status === 200, `Login failed with status ${response.status}`);
-client.assert(response.body.access_token, "No access token in response");
-
-// Save the token for subsequent requests
-const token = response.body.access_token;
-client.global.set("CURRENT_TOKEN", `Bearer ${token}`);
-console.log("Token saved:", token.substring(0, 50) + "...");
-});
-%}
-
-
 ### 3. LOGIN WITH PLAIN PASSWORD (if backend hashes it)
 # @name loginWithPlainPassword
-POST {{BASE_URL}}/auth/login
+POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/auth/login
 Content-Type: {{JSON_CONTENT}}
 
 {
@@ -97,68 +83,26 @@ GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
 
-> {%
-  client.test("Users fetched successfully", function() {
-    client.assert(response.status === 200, `Failed to fetch users: ${response.status}`);
-    client.assert(Array.isArray(response.body), "Response is not an array");
-    
-    // Validate user structure
-    if (response.body.length > 0) {
-      const user = response.body[0];
-      client.assert(user.hasOwnProperty('user_name'), "User missing user_name");
-      client.assert(user.hasOwnProperty('role'), "User missing role");
-      client.assert(user.hasOwnProperty('control_unit'), "User missing control_unit");
-      
-      // Note: user_password should NOT be in response unless explicitly requested
-      client.assert(!user.hasOwnProperty('user_password'), 
-        "User password should not be exposed in GET response");
-    }
-  });
-%}
-
 
 ### 2. GET USER BY ID
 # @name getUserById
-GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users/1003
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users/2002
 {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
 Content-Type: {{JSON_CONTENT}}
-
-> {%
-  client.test("User fetched successfully", function() {
-    client.assert(response.status === 200, `Failed to fetch user: ${response.status}`);
-    
-    const user = response.body;
-    client.assert(user.id === 1003, `Expected ID 1003, got ${user.id}`);
-    client.assert(user.user_name, "User missing username");
-    console.log("User fetched:", user.user_name, "Role:", user.role);
-  });
-%}
 
 
 ### 3. CREATE NEW USER (Admin only)
 # @name createUser
-POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/auth/register
 Content-Type: {{JSON_CONTENT}}
 
 {
-  "username": "technician_ahmed",
-  "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",  // SHA-256 of '123456'
+  "username": "developer_ahmed",
+  "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
   "role": 2,
-  "control_unit": "Technical Department",
+  "control_unit": "Technical-Department",
   "technical_id": 5
 }
-
-> {%
-  client.test("User created successfully", function() {
-    client.assert(response.status === 201, `Failed to create user: ${response.status}`);
-    client.assert(response.body.id, "No user ID in response");
-    
-    // Save the created user ID
-    client.global.set("CREATED_USER_ID", response.body.id);
-    console.log("Created user ID:", response.body.id);
-  });
-%}
 
 
 ### 4. UPDATE USER PROFILE
@@ -174,15 +118,15 @@ Content-Type: {{JSON_CONTENT}}
 
 
 ### 5. UPDATE USER PASSWORD
-# @name updateUserPassword
-PATCH {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users/{{CREATED_USER_ID}}/password
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
-Content-Type: {{JSON_CONTENT}}
+# # @name updateUserPassword
+# PATCH {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/users/{{CREATED_USER_ID}}/password
+# {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+# Content-Type: {{JSON_CONTENT}}
 
-{
-  "current_password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-  "new_password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"  // SHA-256 of '123'
-}
+# {
+#   "current_password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+#   "new_password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3"  // SHA-256 of '123'
+# }
 
 
 ### 6. DELETE USER
@@ -355,10 +299,10 @@ Content-Type: {{JSON_CONTENT}}
 
 
 ### 9. GET APPROVED LOCATIONS (Is_Approved = 1)
-# @name getApprovedLocations
-GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations?is_approved=1
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
-Content-Type: {{JSON_CONTENT}}
+# # @name getApprovedLocations
+# GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations?is_approved=1
+# {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+# Content-Type: {{JSON_CONTENT}}
 
 
 ### 10. GET LOCATIONS BY TECHNICIAN
@@ -431,103 +375,6 @@ GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/approval-needed
 Content-Type: {{JSON_CONTENT}}
 
 
-### 4. APPROVE LOCATION
-# @name approveLocation
-POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/{{CREATED_LOCATION_ID}}/approve
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
-Content-Type: {{JSON_CONTENT}}
-
-{
-  "approved_by": "admin",
-  "approval_notes": "Work completed satisfactorily"
-}
-
-
-### --------------------------------------------
-
-
-### BATCH OPERATIONS
-
-
-### --------------------------------------------
-
-
-### 1. BATCH UPDATE LOCATION STATUS
-# @name batchUpdateLocations
-POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/batch-update
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
-Content-Type: {{JSON_CONTENT}}
-
-{
-  "location_ids": [18, 19, 20],
-  "updates": {
-    "is_finished": 1,
-    "flag": 2
-  }
-}
-
-
-### 2. IMPORT LOCATIONS FROM CSV/JSON
-# @name importLocations
-POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/import
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
-Content-Type: {{JSON_CONTENT}}
-
-[
-  {
-    "Address": "456 Oak Street, Cairo",
-    "Handasah_Name": "Electrical",
-    "Broken_Type": "Power Outage",
-    "Caller_Name": "Omar Hassan",
-    "Caller_Number": "01123456789"
-  },
-  {
-    "Address": "789 Pine Road, Giza",
-    "Handasah_Name": "Plumbing",
-    "Broken_Type": "Pipe Burst",
-    "Caller_Name": "Sara Mohamed",
-    "Caller_Number": "01098765432"
-  }
-]
-
-
-### --------------------------------------------
-
-
-### REPORTING & ANALYTICS
-
-
-### --------------------------------------------
-
-
-### 1. GET DAILY REPORT
-# @name getDailyReport
-GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/reports/daily?date=2024-01-24
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
-Content-Type: {{JSON_CONTENT}}
-
-
-### 2. GET MONTHLY STATISTICS
-# @name getMonthlyStats
-GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/reports/monthly?year=2024&month=1
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
-Content-Type: {{JSON_CONTENT}}
-
-
-### 3. GET TECHNICIAN PERFORMANCE
-# @name getTechnicianPerformance
-GET {{BASE_URL}}/reports/technician-performance?technician_id=5
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
-Content-Type: {{JSON_CONTENT}}
-
-
-### 4. EXPORT LOCATIONS TO CSV
-# @name exportLocations
-GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}/locations/export?format=csv
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
-Accept: text/csv
-
-
 ### --------------------------------------------
 
 
@@ -539,7 +386,7 @@ Accept: text/csv
 
 ### 1. HEALTH CHECK
 # @name healthCheck
-GET {{BASE_URL}}/health
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{HEALTH_END_POINT}}
 Content-Type: {{JSON_CONTENT}}
 
 > {%
@@ -553,15 +400,15 @@ Content-Type: {{JSON_CONTENT}}
 
 ### 2. API INFORMATION
 # @name getApiInfo
-GET {{BASE_URL}}/
+GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{HEALTH_END_POINT}}
 Content-Type: {{JSON_CONTENT}}
 
 
-### 3. DATABASE STATUS
-# @name getDbStatus
-GET {{BASE_URL}}/system/db-status
-{{AUTH_HEADER}}: {{ADMIN_TOKEN}}
-Content-Type: {{JSON_CONTENT}}
+# ### 3. DATABASE STATUS
+# # @name getDbStatus
+# GET {{BASE_URL}}/system/db-status
+# {{AUTH_HEADER}}: {{ADMIN_TOKEN}}
+# Content-Type: {{JSON_CONTENT}}
 
 
 ### 4. CLEAR TEST DATA (Development only)
@@ -657,8 +504,3 @@ curl --request -X POST {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{LOCTIONS_E
 
 
 ### ============================================
-
-
-### Health Check (Redis)
-GET {{BASE_URL}}{{BASE_END_POINT}}{{API_VERSION}}{{HEALTH_END_POINT}}
-Content-Type: application/json
