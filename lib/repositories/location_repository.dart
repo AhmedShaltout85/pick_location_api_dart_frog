@@ -28,15 +28,15 @@ class LocationRepository {
   }
 
   Future<List<Location>> findAll() async {
-    final conn = DatabaseConfig.getConnection();
-    final result = conn.execute('SELECT * FROM Locations');
+    final conn = await DatabaseConfig.getConnection();
+    final result = await conn.execute('SELECT * FROM Locations');
     return _mapToLocations(result);
   }
 
   Future<Location?> findById(int id) async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
-    final result = conn.execute(
+    final result = await conn.execute(
       'SELECT * FROM Locations WHERE ID = ?',
       params: [id],
     );
@@ -47,9 +47,9 @@ class LocationRepository {
   }
 
   Future<List<Location>> findByHandasah(String handasahName) async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
-    final result = conn.execute(
+    final result = await conn.execute(
       'SELECT * FROM Locations WHERE Handasah_Name = ?',
       params: [handasahName],
     );
@@ -58,9 +58,9 @@ class LocationRepository {
   }
 
   Future<List<Location>> findPending() async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
-    final result = conn.execute(
+    final result = await conn.execute(
       'SELECT * FROM Locations WHERE Is_Finished = 0',
     );
 
@@ -68,12 +68,12 @@ class LocationRepository {
   }
 
   Future<Location> create(Location location) async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
     // Convert DateTime to SQL Server compatible format (YYYY-MM-DD)
     final dateStr = location.date.toIso8601String().split('T')[0];
 
-    conn.execute(
+    await conn.execute(
       '''
       INSERT INTO Locations 
       (Address, Latitude, Longitude, Date, Flag, Gis_Url, Handasah_Name, 
@@ -107,7 +107,7 @@ class LocationRepository {
 
   /// Retrieve the last inserted ID from SQL Server
   Future<int?> _getLastInsertedId(DartOdbc conn) async {
-    final idResult = conn.execute('SELECT SCOPE_IDENTITY() AS ID');
+    final idResult = await conn.execute('SELECT SCOPE_IDENTITY() AS ID');
 
     if (idResult.isEmpty) return null;
 
@@ -123,9 +123,9 @@ class LocationRepository {
   }
 
   Future<bool> update(int id, Location location) async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
-    conn.execute(
+    await conn.execute(
       '''
       UPDATE Locations 
       SET Address = ?, 
@@ -165,9 +165,9 @@ class LocationRepository {
   }
 
   Future<bool> delete(int id) async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
-    conn.execute(
+    await conn.execute(
       'DELETE FROM Locations WHERE ID = ?',
       params: [id],
     );

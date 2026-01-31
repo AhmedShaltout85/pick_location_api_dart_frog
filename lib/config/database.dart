@@ -7,7 +7,7 @@ class DatabaseConfig {
   static final DotEnv _env = DotEnv()..load();
   static DartOdbc? _connection;
 
-  static DartOdbc getConnection() {
+  static Future<DartOdbc> getConnection() async {
     if (_connection != null) {
       return _connection!;
     }
@@ -22,9 +22,12 @@ class DatabaseConfig {
     final username = _env['DB_USERNAME'] ?? '';
     final password = _env['DB_PASSWORD'] ?? '';
 
-    _connection = DartOdbc(pathToDriver);
-    _connection!.connect(
+    _connection = DartOdbc(
       dsn: dsn,
+      pathToDriver: pathToDriver,
+    );
+
+    await _connection!.connect(
       username: username,
       password: password,
     );
@@ -32,9 +35,9 @@ class DatabaseConfig {
     return _connection!;
   }
 
-  static void closeConnection() {
+  static Future<void> closeConnection() async {
     if (_connection != null) {
-      _connection!.disconnect();
+      await _connection!.disconnect();
       _connection = null;
     }
   }

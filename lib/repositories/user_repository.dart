@@ -10,7 +10,7 @@ import 'package:pick_location_api/utils/password_helper.dart';
 class UserRepository {
   /// findByUsername
   Future<User?> findByUsername(String username) async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
     final result = await conn.execute(
       'SELECT * FROM pick_location_users WHERE user_name = ?',
@@ -23,7 +23,7 @@ class UserRepository {
 
   /// findById
   Future<User?> findById(int id) async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
     final result = await conn.execute(
       'SELECT * FROM pick_location_users WHERE id = ?',
@@ -36,7 +36,7 @@ class UserRepository {
 
   /// findAll
   Future<List<User>> findAll() async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
     final result = await conn.execute('SELECT * FROM pick_location_users');
 
@@ -58,7 +58,7 @@ class UserRepository {
 
   /// create user
   Future<User> create(User user) async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
     final hashedPassword = user.userPassword != null
         ? PasswordHelper.hashPassword(user.userPassword!)
@@ -111,7 +111,7 @@ class UserRepository {
 
   /// update user
   Future<bool> update(int id, User user) async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
     final params = <dynamic>[
       user.userName ?? '',
@@ -143,7 +143,7 @@ class UserRepository {
 
   /// delete user
   Future<bool> delete(int id) async {
-    final conn = DatabaseConfig.getConnection();
+    final conn = await DatabaseConfig.getConnection();
 
     await conn.execute(
       'DELETE FROM pick_location_users WHERE id = ?',
